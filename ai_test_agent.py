@@ -33,20 +33,28 @@ from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import traceback
+import streamlit as st
 from dotenv import load_dotenv
 import os
 
 load_dotenv()  # loads .env file
 
+# Works for both local .env and Streamlit Secrets
+def get_config(key, default=None):
+    try:
+        return st.secrets[key]
+    except:
+        return os.getenv(key, default)
+
 # =============================================================================
 # EMAIL CONFIGURATION - OUTLOOK SETTINGS
 # =============================================================================
 EMAIL_CONFIG = {
-    "sender_email": os.getenv("SMTP_EMAIL"),
-    "sender_password": os.getenv("SMTP_PASSWORD"),
-    "recipients": os.getenv("SMTP_RECIPIENTS", "").split(","),
-    "smtp_server": os.getenv("SMTP_SERVER"),
-    "smtp_port": int(os.getenv("SMTP_PORT", 587))
+    "sender_email": get_config("SMTP_EMAIL"),
+    "sender_password": get_config("SMTP_PASSWORD"),
+    "recipients": get_config("SMTP_RECIPIENTS", "").split(","),
+    "smtp_server": get_config("SMTP_SERVER"),
+    "smtp_port": int(get_config("SMTP_PORT", 587))
 }
 
 
@@ -54,17 +62,17 @@ EMAIL_CONFIG = {
 # JIRA CONFIGURATION
 # =============================================================================
 JIRA_CONFIG = {
-    "enabled": os.getenv("JIRA_ENABLED", "True") == "True",
-    "base_url": os.getenv("JIRA_BASE_URL"),
-    "email": os.getenv("JIRA_EMAIL"),
-    "api_token": os.getenv("JIRA_API_TOKEN"),
-    "project_key": os.getenv("JIRA_PROJECT_KEY"),
-    "issue_type": os.getenv("JIRA_ISSUE_TYPE", "Task"),
-    "assignee_email": os.getenv("JIRA_ASSIGNEE_EMAIL"),
-    "labels": os.getenv("JIRA_LABELS", "").split(","),
+    "enabled": get_config("JIRA_ENABLED", "True") == "True",
+    "base_url": get_config("JIRA_BASE_URL"),
+    "email": get_config("JIRA_EMAIL"),
+    "api_token": get_config("JIRA_API_TOKEN"),
+    "project_key": get_config("JIRA_PROJECT_KEY"),
+    "issue_type": get_config("JIRA_ISSUE_TYPE", "Task"),
+    "assignee_email": get_config("JIRA_ASSIGNEE_EMAIL"),
+    "labels": get_config("JIRA_LABELS", "").split(","),
     "custom_fields": {
-        "digital_marketing_sla": os.getenv("JIRA_SLA"),
-        "product_backlog_ready": os.getenv("JIRA_BACKLOG_READY"),
+        "digital_marketing_sla": get_config("JIRA_SLA"),
+        "product_backlog_ready": get_config("JIRA_BACKLOG_READY"),
     }
 }
 
