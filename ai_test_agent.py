@@ -312,10 +312,11 @@ class AITestAgentScheduled:
         run_performance = mode in ("all", "performance")
         
         run_mobile      = mode in ("all", "mobile")
-        options.add_argument("--headless=new")  # ← replace --headless with this
-        options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")  # ← add this
-        options = webdriver.ChromeOptions()
         
+        import platform
+        options = webdriver.ChromeOptions()
+        options.add_argument("--headless=new")
+        options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         options.add_argument("--start-maximized")
         options.add_argument("--disable-notifications")
         options.add_argument("--disable-popup-blocking")
@@ -324,16 +325,18 @@ class AITestAgentScheduled:
         options.add_argument("--disable-gpu")
         options.add_argument("--disable-extensions")
         options.add_argument("--window-size=1920,1080")
+        options.add_argument("--force-device-scale-factor=1")
         options.add_experimental_option('excludeSwitches', ['enable-logging', 'enable-automation'])
         options.add_experimental_option('useAutomationExtension', False)
-        import platform
+
         if platform.system() == "Linux":
             options.binary_location = "/usr/bin/chromium"
             service = Service("/usr/bin/chromedriver")
         else:
             service = Service(ChromeDriverManager().install())
+
         driver = webdriver.Chrome(service=service, options=options)
-        driver.implicitly_wait(10)  # ← Add this line
+        driver.implicitly_wait(10)
         wait = WebDriverWait(driver, 30)
         try:
             # =========================
