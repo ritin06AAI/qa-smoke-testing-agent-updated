@@ -19,6 +19,9 @@ if "last_reports" not in st.session_state:
 # =========================
 # HISTORY FILE
 # =========================
+# =========================
+# HISTORY FILE
+# =========================
 HISTORY_FILE = "test_history.json"
 
 def load_history():
@@ -34,8 +37,12 @@ def save_history(data):
     with open(HISTORY_FILE, "w") as f:
         json.dump(history, f, indent=4)
 
-history = load_history()
+def clear_history():
+    with open(HISTORY_FILE, "w") as f:
+        json.dump([], f)
 
+# Always reload fresh on every page run
+history = load_history()
 # =========================
 # HEADER
 # =========================
@@ -66,6 +73,15 @@ browser_mode = st.sidebar.selectbox(
     help="Headed mode only works when running locally"
 )
 run_headless = browser_mode == "Headless (Cloud)"
+
+# Clear History Button
+st.sidebar.markdown("---")
+if st.sidebar.button("🗑️ Clear History"):
+    clear_history()
+    st.session_state.last_reports = None
+    st.sidebar.success("History cleared!")
+    st.rerun()
+    
 # =========================
 # EXECUTION SUMMARY
 # =========================
