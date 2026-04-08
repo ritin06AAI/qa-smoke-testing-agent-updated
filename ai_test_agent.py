@@ -88,7 +88,8 @@ SCHEDULE_TIME = "19:00"   # 7:00 PM IST — change to "13:30" if clock is UTC
 
 
 class AITestAgentScheduled:
-    def __init__(self, agent_name="QA-Agent-001"):
+    def __init__(self, agent_name="QA-Agent", run_headless=True):
+        self.run_headless = run_headless
         self.agent_name = agent_name
         self.version = "2.0.0"
         self.start_time = datetime.now()
@@ -313,9 +314,18 @@ class AITestAgentScheduled:
         
         run_mobile      = mode in ("all", "mobile")
         
+        
+        
         import platform
         options = webdriver.ChromeOptions()
-        options.add_argument("--headless=new")
+
+        # Use headless based on parameter or if running on Linux cloud
+        if self.run_headless or platform.system() == "Linux":
+            options.add_argument("--headless=new")
+            print("   INFO - Running in HEADLESS mode")
+        else:
+            print("   INFO - Running in HEADED mode (browser visible)")
+
         options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
         options.add_argument("--start-maximized")
         options.add_argument("--disable-notifications")
@@ -1788,14 +1798,13 @@ def run_scheduled():
 # MAIN ENTRY POINT — called by Streamlit UI via run_tests()
 # FIX: now sends email and creates Jira ticket when requested
 # =============================================================================
-def run_tests(mode: str = "all", with_jira: bool = False):
+def run_tests(mode: str = "all", with_jira: bool = False, run_headless: bool = True):
     # ------------------------------------------------------------------ #
     # BUG FIX: previously this function ONLY ran the test suite and       #
     # returned results. Email and Jira were never triggered from the UI.  #
     # ------------------------------------------------------------------ #
     JIRA_CONFIG["enabled"] = with_jira
-
-    agent   = AITestAgentScheduled(agent_name="QA-Agent-UI")
+    agent   = AITestAgentScheduled(agent_name="QA-Agent-UI", run_headless=run_headless)
     reports = agent.run_test_suite(mode=mode)
 
     # Always send email

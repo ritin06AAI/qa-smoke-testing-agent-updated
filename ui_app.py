@@ -59,6 +59,13 @@ jira_option = st.sidebar.selectbox(
     ["Run WITHOUT JIRA", "Run WITH JIRA"]
 )
 
+# Browser Mode Dropdown
+browser_mode = st.sidebar.selectbox(
+    "Browser Mode",
+    ["Headless (Cloud)", "Headed (Local Only)"],
+    help="Headed mode only works when running locally"
+)
+run_headless = browser_mode == "Headless (Cloud)"
 # =========================
 # EXECUTION SUMMARY
 # =========================
@@ -127,8 +134,7 @@ if user_input:
         # Jira ticket is created only when with_jira=True
         # ------------------------------------------------------------------
         with st.spinner("Running AI Test Agent..."):
-            result = run_tests(mode=command, with_jira=with_jira)
-
+            result = run_tests(mode=command, with_jira=with_jira, run_headless=run_headless)
         # Store result in session state so Reports section can use it
         st.session_state.last_reports = result
 
