@@ -331,7 +331,8 @@ class AITestAgentScheduled:
         else:
             service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=options)
-        wait = WebDriverWait(driver, 15)
+        driver.implicitly_wait(10)  # ← Add this line
+        wait = WebDriverWait(driver, 30)
         try:
             # =========================
             # NAVIGATION GROUP
@@ -572,10 +573,19 @@ class AITestAgentScheduled:
                 print("-" * 70)
 
                 driver.get("https://www.automationanywhere.com/request-live-demo")
-                time.sleep(5)
-                self.handle_popups(driver)
-                driver.execute_script("window.scrollBy(0, 400)")
-                time.sleep(2)
+time.sleep(10)  # ← increased from 5 to 10
+self.handle_popups(driver)
+driver.execute_script("window.scrollBy(0, 400)")
+time.sleep(5)  # ← increased from 2 to 5
+
+# Wait for Marketo form to load
+try:
+    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "form.mktoForm, input[name*='FirstName'], input[name*='Email']")))
+    print("   INFO - Form detected on page")
+    time.sleep(3)  # extra buffer after form loads
+except:
+    print("   WARN - Form not detected, proceeding anyway")
+    time.sleep(5)
 
                 test_data = {
                     "first_name": "Test",
@@ -589,7 +599,7 @@ class AITestAgentScheduled:
 
                 # ---------- 1. First Name ----------
                 first_name_strategies = [
-                    ("css", "input[name*='FirstName'], input[aria-label*='First Name'], input[placeholder*='First Name']")
+                    ("css", "input[name='FirstName'], input[name*='FirstName'], input[id*='FirstName'], input[aria-label*='First Name'], input[placeholder*='First']")
                 ]
                 if self.fill_form_field(driver, "first_name", test_data["first_name"], first_name_strategies):
                     print("   PASS - First Name filled")
@@ -602,7 +612,7 @@ class AITestAgentScheduled:
 
                 # ---------- 2. Last Name ----------
                 last_name_strategies = [
-                    ("css", "input[name*='LastName'], input[aria-label*='Last Name'], input[placeholder*='Last Name']")
+                    ("css", "input[name='LastName'], input[name*='LastName'], input[id*='LastName'], input[aria-label*='Last Name'], input[placeholder*='Last']")
                 ]
                 if self.fill_form_field(driver, "last_name", test_data["last_name"], last_name_strategies):
                     print("   PASS - Last Name filled")
@@ -615,7 +625,7 @@ class AITestAgentScheduled:
 
                 # ---------- 3. Business Email ----------
                 email_strategies = [
-                    ("css", "input[type='email'], input[name*='Email'], input[aria-label*='Business Email'], input[placeholder*='Business Email']")
+                    ("css", "input[name='Email'], input[name*='Email'], input[type='email'], input[id*='Email']")
                 ]
                 if self.fill_form_field(driver, "business_email", test_data["email"], email_strategies):
                     print("   PASS - Business Email filled")
@@ -628,7 +638,7 @@ class AITestAgentScheduled:
 
                 # ---------- 4. Phone Number ----------
                 phone_strategies = [
-                    ("css", "input[type='tel'], input[name*='Phone'], input[aria-label*='Phone Number'], input[placeholder*='Phone Number']")
+                    ("css", "input[name='Phone'], input[name*='Phone'], input[type='tel'], input[id*='Phone']")
                 ]
                 if self.fill_form_field(driver, "phone_number", test_data["phone"], phone_strategies):
                     print("   PASS - Phone Number filled")
@@ -641,7 +651,7 @@ class AITestAgentScheduled:
 
                 # ---------- 5. Company Name ----------
                 company_strategies = [
-                    ("css", "input[name*='Company'], input[aria-label*='Company Name'], input[placeholder*='Company Name']")
+                    ("css", "input[name='Company'], input[name*='Company'], input[id*='Company']")
                 ]
                 if self.fill_form_field(driver, "company_name", test_data["company"], company_strategies):
                     print("   PASS - Company Name filled")
