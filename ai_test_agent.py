@@ -1798,7 +1798,7 @@ def run_scheduled():
 # MAIN ENTRY POINT — called by Streamlit UI via run_tests()
 # FIX: now sends email and creates Jira ticket when requested
 # =============================================================================
-def run_tests(mode: str = "all", with_jira: bool = False, run_headless: bool = True):
+def run_tests(mode: str = "all", with_jira: bool = False, run_headless: bool = True, send_email: bool = True):
     # ------------------------------------------------------------------ #
     # BUG FIX: previously this function ONLY ran the test suite and       #
     # returned results. Email and Jira were never triggered from the UI.  #
@@ -1807,9 +1807,12 @@ def run_tests(mode: str = "all", with_jira: bool = False, run_headless: bool = T
     agent   = AITestAgentScheduled(agent_name="QA-Agent-UI", run_headless=run_headless)
     reports = agent.run_test_suite(mode=mode)
 
-    # Always send email
-    print("\n--- Sending email report ---")
-    send_email_report(reports, agent)
+    # Send email only if enabled
+    if send_email:
+        print("\n--- Sending email report ---")
+        send_email_report(reports, agent)
+    else:
+        print("\n--- Email report skipped ---")
 
     # Create Jira ticket only when requested via UI toggle
     jira_result = None

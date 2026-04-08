@@ -82,6 +82,14 @@ if st.sidebar.button("🗑️ Clear History"):
     st.sidebar.success("History cleared!")
     st.rerun()
     
+    # Email Toggle
+send_email = st.sidebar.selectbox(
+    "Send Email Report",
+    ["Yes", "No"],
+    help="Send email report after test execution"
+)
+send_email = send_email == "Yes"
+    
 # =========================
 # EXECUTION SUMMARY
 # =========================
@@ -150,7 +158,7 @@ if user_input:
         # Jira ticket is created only when with_jira=True
         # ------------------------------------------------------------------
         with st.spinner("Running AI Test Agent..."):
-            result = run_tests(mode=command, with_jira=with_jira, run_headless=run_headless)
+            result = run_tests(mode=command, with_jira=with_jira, run_headless=run_headless, send_email=send_email)
         # Store result in session state so Reports section can use it
         st.session_state.last_reports = result
 
