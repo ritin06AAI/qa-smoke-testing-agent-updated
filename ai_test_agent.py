@@ -312,8 +312,10 @@ class AITestAgentScheduled:
         run_performance = mode in ("all", "performance")
         
         run_mobile      = mode in ("all", "mobile")
+        options.add_argument("--headless=new")  # ← replace --headless with this
+        options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")  # ← add this
         options = webdriver.ChromeOptions()
-        options.add_argument("--headless")
+        
         options.add_argument("--start-maximized")
         options.add_argument("--disable-notifications")
         options.add_argument("--disable-popup-blocking")
@@ -573,19 +575,19 @@ class AITestAgentScheduled:
                 print("-" * 70)
 
                 driver.get("https://www.automationanywhere.com/request-live-demo")
-time.sleep(10)  # ← increased from 5 to 10
-self.handle_popups(driver)
-driver.execute_script("window.scrollBy(0, 400)")
-time.sleep(5)  # ← increased from 2 to 5
+                time.sleep(10)
+                self.handle_popups(driver)
+                driver.execute_script("window.scrollBy(0, 400)")
+                time.sleep(5)
 
-# Wait for Marketo form to load
-try:
-    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "form.mktoForm, input[name*='FirstName'], input[name*='Email']")))
-    print("   INFO - Form detected on page")
-    time.sleep(3)  # extra buffer after form loads
-except:
-    print("   WARN - Form not detected, proceeding anyway")
-    time.sleep(5)
+                # Wait for Marketo form to load
+                try:
+                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "form.mktoForm, input[name*='FirstName'], input[name*='Email']")))
+                    print("   INFO - Form detected on page")
+                    time.sleep(3)
+                except Exception:
+                    print("   WARN - Form not detected, proceeding anyway")
+                    time.sleep(5)
 
                 test_data = {
                     "first_name": "Test",
