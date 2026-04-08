@@ -304,7 +304,8 @@ class AITestAgentScheduled:
         run_performance = mode in ("all", "performance")
         run_mobile      = mode in ("all", "mobile")
 
-        options = webdriver.ChromeOptions()
+         options = webdriver.ChromeOptions()
+        options.add_argument("--headless")  # ← Added for cloud
         options.add_argument("--start-maximized")
         options.add_argument("--disable-notifications")
         options.add_argument("--disable-popup-blocking")
@@ -312,11 +313,21 @@ class AITestAgentScheduled:
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
         options.add_argument("--disable-extensions")
+        options.add_argument("--window-size=1920,1080")  # ← Added for headless
         options.add_experimental_option('excludeSwitches', ['enable-logging', 'enable-automation'])
         options.add_experimental_option('useAutomationExtension', False)
 
-        driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+        # ← Updated driver setup for cloud
+        import platform
+        if platform.system() == "Linux":
+            options.binary_location = "/usr/bin/chromium"
+            service = Service("/usr/bin/chromedriver")
+        else:
+            service = Service(ChromeDriverManager().install())
+
+        driver = webdriver.Chrome(service=service, options=options)
         wait = WebDriverWait(driver, 15)
+        try:
 
         try:
             # =========================
