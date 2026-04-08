@@ -569,6 +569,7 @@ class AITestAgentScheduled:
                 self.add_result("Solutions Page", "PASS", driver.current_url)
 
             # =========================
+            # =========================
             # FORM GROUP
             # (TEST 6)
             # =========================
@@ -578,19 +579,25 @@ class AITestAgentScheduled:
                 print("-" * 70)
 
                 driver.get("https://www.automationanywhere.com/request-live-demo")
-                time.sleep(10)
+
+                # Wait for page to fully load dynamically
+                try:
+                    wait.until(lambda d: d.execute_script("return document.readyState") == "complete")
+                    print("   INFO - Page loaded")
+                except:
+                    print("   WARN - Page load timeout, proceeding anyway")
+
                 self.handle_popups(driver)
                 driver.execute_script("window.scrollBy(0, 400)")
-                time.sleep(5)
 
-                # Wait for Marketo form to load
+                # Wait for form to appear - moves on immediately when found
                 try:
-                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "form.mktoForm, input[name*='FirstName'], input[name*='Email']")))
-                    print("   INFO - Form detected on page")
-                    time.sleep(3)
-                except Exception:
-                    print("   WARN - Form not detected, proceeding anyway")
-                    time.sleep(5)
+                    form_wait = WebDriverWait(driver, 20)
+                    form_wait.until(EC.presence_of_element_located((By.CSS_SELECTOR,
+                        "form.mktoForm, input[name*='FirstName'], input[name='Email'], input[type='email']")))
+                    print("   INFO - Form detected, proceeding")
+                except:
+                    print("   WARN - Form not detected after 20s, proceeding anyway")
 
                 test_data = {
                     "first_name": "Test",
@@ -602,95 +609,99 @@ class AITestAgentScheduled:
 
                 fields_filled = 0
 
+                # Helper - wait for element dynamically then fill
+                def wait_and_fill(field_name, css_selector, value, result_label):
+                    try:
+                        element = WebDriverWait(driver, 15).until(
+                            EC.presence_of_element_located((By.CSS_SELECTOR, css_selector))
+                        )
+                        driver.execute_script("arguments[0].scrollIntoView(true);", element)
+                        element.clear()
+                        element.send_keys(value)
+                        print(f"   PASS - {result_label} filled")
+                        self.add_result(f"Form - {result_label}", "PASS", value)
+                        return True
+                    except:
+                        print(f"   FAIL - {result_label} field not found")
+                        self.add_result(f"Form - {result_label}", "FAIL", "Field not found")
+                        return False
+
+                # Helper - wait for dropdown dynamically
+                def wait_and_find_select(field_name, css_selector, timeout=15):
+                    try:
+                        element = WebDriverWait(driver, timeout).until(
+                            EC.presence_of_element_located((By.CSS_SELECTOR, css_selector))
+                        )
+                        return element
+                    except:
+                        return None
+
                 # ---------- 1. First Name ----------
-                first_name_strategies = [
-                    ("css", "input[name='FirstName'], input[name*='FirstName'], input[id*='FirstName'], input[aria-label*='First Name'], input[placeholder*='First']")
-                ]
-                if self.fill_form_field(driver, "first_name", test_data["first_name"], first_name_strategies):
-                    print("   PASS - First Name filled")
-                    self.add_result("Form - First Name", "PASS", test_data["first_name"])
+                if wait_and_fill(
+                    "first_name",
+                    "input[name='FirstName'], input[name*='FirstName'], input[id*='FirstName'], input[placeholder*='First']",
+                    test_data["first_name"],
+                    "First Name"
+                ):
                     fields_filled += 1
-                else:
-                    print("   FAIL - First Name field not found")
-                    self.add_result("Form - First Name", "FAIL", "Field not found")
-                time.sleep(0.2)
 
                 # ---------- 2. Last Name ----------
-                last_name_strategies = [
-                    ("css", "input[name='LastName'], input[name*='LastName'], input[id*='LastName'], input[aria-label*='Last Name'], input[placeholder*='Last']")
-                ]
-                if self.fill_form_field(driver, "last_name", test_data["last_name"], last_name_strategies):
-                    print("   PASS - Last Name filled")
-                    self.add_result("Form - Last Name", "PASS", test_data["last_name"])
+                if wait_and_fill(
+                    "last_name",
+                    "input[name='LastName'], input[name*='LastName'], input[id*='LastName'], input[placeholder*='Last']",
+                    test_data["last_name"],
+                    "Last Name"
+                ):
                     fields_filled += 1
-                else:
-                    print("   FAIL - Last Name field not found")
-                    self.add_result("Form - Last Name", "FAIL", "Field not found")
-                time.sleep(0.2)
 
                 # ---------- 3. Business Email ----------
-                email_strategies = [
-                    ("css", "input[name='Email'], input[name*='Email'], input[type='email'], input[id*='Email']")
-                ]
-                if self.fill_form_field(driver, "business_email", test_data["email"], email_strategies):
-                    print("   PASS - Business Email filled")
-                    self.add_result("Form - Business Email", "PASS", test_data["email"])
+                if wait_and_fill(
+                    "business_email",
+                    "input[name='Email'], input[name*='Email'], input[type='email'], input[id*='Email']",
+                    test_data["email"],
+                    "Business Email"
+                ):
                     fields_filled += 1
-                else:
-                    print("   FAIL - Business Email field not found")
-                    self.add_result("Form - Business Email", "FAIL", "Field not found")
-                time.sleep(0.2)
 
                 # ---------- 4. Phone Number ----------
-                phone_strategies = [
-                    ("css", "input[name='Phone'], input[name*='Phone'], input[type='tel'], input[id*='Phone']")
-                ]
-                if self.fill_form_field(driver, "phone_number", test_data["phone"], phone_strategies):
-                    print("   PASS - Phone Number filled")
-                    self.add_result("Form - Phone Number", "PASS", test_data["phone"])
+                if wait_and_fill(
+                    "phone_number",
+                    "input[name='Phone'], input[name*='Phone'], input[type='tel'], input[id*='Phone']",
+                    test_data["phone"],
+                    "Phone Number"
+                ):
                     fields_filled += 1
-                else:
-                    print("   FAIL - Phone Number field not found")
-                    self.add_result("Form - Phone Number", "FAIL", "Field not found")
-                time.sleep(0.2)
 
                 # ---------- 5. Company Name ----------
-                company_strategies = [
-                    ("css", "input[name='Company'], input[name*='Company'], input[id*='Company']")
-                ]
-                if self.fill_form_field(driver, "company_name", test_data["company"], company_strategies):
-                    print("   PASS - Company Name filled")
-                    self.add_result("Form - Company Name", "PASS", test_data["company"])
+                if wait_and_fill(
+                    "company_name",
+                    "input[name='Company'], input[name*='Company'], input[id*='Company']",
+                    test_data["company"],
+                    "Company Name"
+                ):
                     fields_filled += 1
-                else:
-                    print("   FAIL - Company Name field not found")
-                    self.add_result("Form - Company Name", "FAIL", "Field not found")
-                time.sleep(0.2)
 
                 # ---------- 6. Number of Employees ----------
-                employees_strategies = [
-                    ("css", "select[name*='Employees'], select[aria-label*='Number of Employees'], select[id*='Employees']")
-                ]
-                emp_element = self.smart_find_element(driver, "number_of_employees", employees_strategies)
+                emp_element = wait_and_find_select(
+                    "number_of_employees",
+                    "select[name*='Employees'], select[aria-label*='Number of Employees'], select[id*='Employees']"
+                )
                 if emp_element:
                     try:
                         driver.execute_script("arguments[0].scrollIntoView(true);", emp_element)
-                        time.sleep(0.2)
                         select_obj = Select(emp_element)
                         selected = False
-
                         preferred_ranges = ["100-499", "100 - 499", "100 to 499"]
                         for pref in preferred_ranges:
                             try:
                                 select_obj.select_by_visible_text(pref)
-                                print(f"   PASS - Number of Employees selected by text: '{pref}'")
+                                print(f"   PASS - Number of Employees selected: '{pref}'")
                                 self.add_result("Form - Number of Employees", "PASS", pref)
                                 fields_filled += 1
                                 selected = True
                                 break
                             except:
                                 continue
-
                         if not selected:
                             for opt in select_obj.options:
                                 if opt.get_attribute("value") and opt.get_attribute("value").strip() != "":
@@ -700,90 +711,75 @@ class AITestAgentScheduled:
                                     fields_filled += 1
                                     selected = True
                                     break
-
                         if not selected:
-                            print("   WARN - Number of Employees dropdown has no selectable options")
+                            print("   WARN - Number of Employees no selectable options")
                             self.add_result("Form - Number of Employees", "WARNING", "No selectable options")
                     except Exception as e:
-                        print(f"   WARN - Number of Employees dropdown interaction failed: {str(e)[:60]}")
+                        print(f"   WARN - Number of Employees failed: {str(e)[:60]}")
                         self.add_result("Form - Number of Employees", "WARNING", str(e)[:60])
                 else:
                     print("   FAIL - Number of Employees dropdown not found")
                     self.add_result("Form - Number of Employees", "FAIL", "Field not found")
-                time.sleep(0.2)
 
                 # ---------- 7. Job Function ----------
-                job_function_strategies = [
-                    ("css", "select[name*='JobFunction'], select[name*='Job_Function'], "
-                            "select[aria-label*='Job Function'], select[id*='JobFunction']"),
-                    ("css", "select[name*='Job'], select[name*='Function'], "
-                            "select[id*='Job'], select[id*='Function']")
-                ]
-                job_element = self.smart_find_element(driver, "job_function_dropdown", job_function_strategies)
-
+                job_element = wait_and_find_select(
+                    "job_function",
+                    "select[name*='JobFunction'], select[name*='Job_Function'], select[aria-label*='Job Function'], select[id*='JobFunction'], select[name*='Job'], select[id*='Job']"
+                )
                 if job_element:
                     try:
                         driver.execute_script("arguments[0].scrollIntoView(true);", job_element)
-                        time.sleep(0.2)
-
-                        max_wait = 10
-                        start_time = time.time()
                         selected = False
-
                         preferred_roles = ["Manager", "Director", "Staff", "Individual Contributor"]
+                        select_obj = Select(job_element)
 
-                        while time.time() - start_time < max_wait and not selected:
-                            select_obj = Select(job_element)
+                        # Wait until options are populated
+                        start_time = time.time()
+                        while time.time() - start_time < 10:
                             options = [opt for opt in select_obj.options
-                                       if opt.get_attribute("value") and opt.get_attribute("value").strip() != ""]
+                                      if opt.get_attribute("value") and opt.get_attribute("value").strip() != ""]
+                            if len(options) > 0:
+                                break
+                            time.sleep(0.3)
 
-                            if len(options) == 0:
-                                time.sleep(0.5)
-                                continue
-
-                            for pref in preferred_roles:
-                                try:
-                                    select_obj.select_by_visible_text(pref)
-                                    print(f"   PASS - Job Function selected by text: '{pref}'")
-                                    self.add_result("Form - Job Function", "PASS", pref)
-                                    fields_filled += 1
-                                    selected = True
-                                    break
-                                except:
-                                    continue
-
-                            if not selected:
-                                opt = options[0]
-                                select_obj.select_by_value(opt.get_attribute("value"))
-                                print(f"   PASS - Job Function selected: '{opt.text}'")
-                                self.add_result("Form - Job Function", "PASS", opt.text)
+                        for pref in preferred_roles:
+                            try:
+                                select_obj.select_by_visible_text(pref)
+                                print(f"   PASS - Job Function selected: '{pref}'")
+                                self.add_result("Form - Job Function", "PASS", pref)
                                 fields_filled += 1
                                 selected = True
                                 break
+                            except:
+                                continue
+
+                        if not selected and options:
+                            opt = options[0]
+                            select_obj.select_by_value(opt.get_attribute("value"))
+                            print(f"   PASS - Job Function selected: '{opt.text}'")
+                            self.add_result("Form - Job Function", "PASS", opt.text)
+                            fields_filled += 1
+                            selected = True
 
                         if not selected:
-                            print("   WARN - Job Function dropdown has options but none were selectable in time")
-                            self.add_result("Form - Job Function", "WARNING", "Options not selectable")
+                            print("   WARN - Job Function no selectable options")
+                            self.add_result("Form - Job Function", "WARNING", "No selectable options")
                     except Exception as e:
-                        print(f"   WARN - Job Function dropdown interaction failed: {str(e)[:60]}")
+                        print(f"   WARN - Job Function failed: {str(e)[:60]}")
                         self.add_result("Form - Job Function", "WARNING", str(e)[:60])
                 else:
                     print("   FAIL - Job Function dropdown not found")
                     self.add_result("Form - Job Function", "FAIL", "Field not found")
 
-                time.sleep(0.2)
-
                 # ---------- 8. Country/Region ----------
-                country_strategies = [
-                    ("css", "select[name*='Country'], select[aria-label*='Country/Region'], select[id*='Country']")
-                ]
-                country_element = self.smart_find_element(driver, "country_region_dropdown", country_strategies)
+                country_element = wait_and_find_select(
+                    "country_region",
+                    "select[name*='Country'], select[aria-label*='Country/Region'], select[id*='Country']"
+                )
                 if country_element:
                     try:
                         driver.execute_script("arguments[0].scrollIntoView(true);", country_element)
-                        time.sleep(0.2)
                         select_obj = Select(country_element)
-
                         selected = False
                         try:
                             select_obj.select_by_visible_text("Australia")
@@ -795,58 +791,60 @@ class AITestAgentScheduled:
                             for opt in select_obj.options:
                                 if "australia" in opt.text.lower():
                                     select_obj.select_by_visible_text(opt.text)
-                                    print(f"   PASS - Country selected (fallback): '{opt.text}'")
+                                    print(f"   PASS - Country selected: '{opt.text}'")
                                     self.add_result("Form - Country/Region", "PASS", opt.text)
                                     fields_filled += 1
                                     selected = True
                                     break
-
                         if not selected:
-                            print("   FAIL - Could not select Australia in Country dropdown")
-                            self.add_result("Form - Country/Region", "FAIL", "Australia not found in options")
+                            print("   FAIL - Australia not found in Country dropdown")
+                            self.add_result("Form - Country/Region", "FAIL", "Australia not found")
                     except Exception as e:
-                        print(f"   WARN - Country dropdown interaction failed: {str(e)[:60]}")
+                        print(f"   WARN - Country dropdown failed: {str(e)[:60]}")
                         self.add_result("Form - Country/Region", "WARNING", str(e)[:60])
                 else:
                     print("   FAIL - Country dropdown not found")
                     self.add_result("Form - Country/Region", "FAIL", "Field not found")
-                time.sleep(0.2)
 
-                # ---------- First submit ----------
+                # ---------- Submit ----------
                 self.capture_screenshot(driver, "Form_Before_First_Submit", "info")
 
                 submit_strategies = [
                     ("css", "button[type='submit']"),
                     ("css", "input[type='submit']"),
-                    ("xpath", "//button[contains(text(),'Request Live Demo') "
-                              "or contains(text(),'Request live demo') "
-                              "or contains(text(),'Request demo')]"),
+                    ("xpath", "//button[contains(text(),'Request Live Demo') or contains(text(),'Request live demo') or contains(text(),'Request demo')]"),
                 ]
                 submit_btn = self.smart_find_element(driver, "request_live_demo_button", submit_strategies)
 
                 if submit_btn:
-                    print("   Submit (Request Live Demo) button found - first click...")
+                    print("   Submit button found - clicking...")
                     self.add_result("Form - Submit Button", "PASS", "Found")
                     try:
                         driver.execute_script("arguments[0].scrollIntoView(true);", submit_btn)
-                        time.sleep(0.5)
                         driver.execute_script("arguments[0].click();", submit_btn)
-                        time.sleep(4)
+
+                        # Wait for page to change dynamically instead of fixed sleep
+                        try:
+                            wait.until(lambda d: d.current_url != "https://www.automationanywhere.com/request-live-demo" 
+                                      or "thank" in d.current_url.lower()
+                                      or "thank you" in d.page_source.lower())
+                            print("   INFO - Page changed after submit")
+                        except:
+                            print("   WARN - Page did not change after submit")
                     except Exception as e:
-                        print(f"   FAIL - First submit click failed: {str(e)[:60]}")
+                        print(f"   FAIL - Submit click failed: {str(e)[:60]}")
                         self.add_result("Form - Submit Button", "FAIL", f"Click failed: {str(e)[:60]}")
                 else:
-                    print("   FAIL - Request Live Demo button not found")
+                    print("   FAIL - Submit button not found")
                     self.add_result("Form - Submit Button", "FAIL", "Not found")
 
                 # ---------- Fix validation errors and resubmit ----------
                 try:
                     error_elements = driver.find_elements(
-                        By.CSS_SELECTOR,
-                        ".mktoError, .mktoInvalid, [aria-invalid='true']"
+                        By.CSS_SELECTOR, ".mktoError, .mktoInvalid, [aria-invalid='true']"
                     )
                     if error_elements:
-                        print(f"   INFO - Validation errors detected: {len(error_elements)} – attempting to fix and resubmit")
+                        print(f"   INFO - {len(error_elements)} validation errors found, fixing and resubmitting")
                         for err in error_elements:
                             try:
                                 parent = err.find_element(By.XPATH, ".//ancestor::*[self::div or self::span][1]")
@@ -864,18 +862,21 @@ class AITestAgentScheduled:
                                                 break
                             except:
                                 continue
-
                         submit_btn2 = self.smart_find_element(driver, "request_live_demo_button_retry", submit_strategies)
                         if submit_btn2:
                             driver.execute_script("arguments[0].scrollIntoView(true);", submit_btn2)
-                            time.sleep(0.5)
                             driver.execute_script("arguments[0].click();", submit_btn2)
-                            print("   Second submit attempted after fixing errors")
-                            time.sleep(5)
+                            print("   Second submit attempted")
+                            # Dynamic wait after second submit
+                            try:
+                                wait.until(lambda d: "thank" in d.current_url.lower() 
+                                          or "thank you" in d.page_source.lower())
+                            except:
+                                pass
                 except:
                     pass
 
-                # ---------- Verify Thank You / redirect ----------
+                # ---------- Verify Thank You ----------
                 current_url = driver.current_url.lower()
                 page_source = driver.page_source.lower()
 
@@ -884,23 +885,17 @@ class AITestAgentScheduled:
                     self.add_result("Form - Thank You Redirect", "PASS", f"Redirected to: {driver.current_url}")
                     self.capture_screenshot(driver, "Form_ThankYou_Page", "pass")
                 elif "thank you" in page_source or "thank-you" in page_source or "submission" in page_source:
-                    print(f"   PASS - Thank You content detected on page: {driver.current_url}")
+                    print(f"   PASS - Thank You content detected: {driver.current_url}")
                     self.add_result("Form - Thank You Redirect", "PASS", f"Thank You content at: {driver.current_url}")
                     self.capture_screenshot(driver, "Form_ThankYou_Page", "pass")
                 else:
-                    print(f"   FAIL - Did NOT redirect to Thank You page. Current URL: {driver.current_url}")
+                    print(f"   FAIL - No Thank You redirect. URL: {driver.current_url}")
                     screenshot = self.capture_screenshot(driver, "Form_No_ThankYou_Redirect", "failure")
-                    self.add_result(
-                        "Form - Thank You Redirect",
-                        "FAIL",
-                        f"No thank-you redirect. Stayed at: {driver.current_url}"
-                    )
+                    self.add_result("Form - Thank You Redirect", "FAIL", f"Stayed at: {driver.current_url}")
                     self.add_issue(
-                        "Demo Form",
-                        "Redirect Failure",
+                        "Demo Form", "Redirect Failure",
                         "After clicking Request Live Demo, page did not redirect to Thank You page.",
-                        screenshot,
-                        driver.current_url
+                        screenshot, driver.current_url
                     )
 
                 print(f"\n   Form Summary: {fields_filled} fields filled/selected")
@@ -909,7 +904,8 @@ class AITestAgentScheduled:
                     "PASS" if fields_filled >= 5 else "FAIL",
                     f"{fields_filled} fields filled/selected"
                 )
-
+            
+            
             # =========================
             # PERFORMANCE GROUP (TEST 7)
             # =========================
