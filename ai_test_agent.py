@@ -340,7 +340,10 @@ class AITestAgentScheduled:
         options.add_experimental_option('useAutomationExtension', False)
 
         if platform.system() == "Linux":
-            options.binary_location = "/usr/bin/chromium"
+            if os.path.exists("/usr/bin/google-chrome"):
+                options.binary_location = "/usr/bin/google-chrome"
+            elif os.path.exists("/usr/bin/chromium-browser"):
+                options.binary_location = "/usr/bin/chromium-browser"
             service = Service("/usr/bin/chromedriver")
         else:
             service = Service(ChromeDriverManager().install())
