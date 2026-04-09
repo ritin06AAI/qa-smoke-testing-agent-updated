@@ -273,12 +273,6 @@ if notif_platform != "None":
 
 st.sidebar.markdown("---")
 
-# --- Quick Links ---
-st.sidebar.markdown("### 🔗 Quick Links")
-st.sidebar.markdown("[![AA Website](https://img.shields.io/badge/🌐-AA Website-blue)](https://www.automationanywhere.com)")
-st.sidebar.markdown("[![Jira Board](https://img.shields.io/badge/🎫-Jira Board-orange)](https://automationanywhere.atlassian.net)")
-
-st.sidebar.markdown("---")
 
 # --- Agent Status ---
 last_run = history[-1] if history else None
