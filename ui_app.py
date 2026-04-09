@@ -216,6 +216,19 @@ send_email = send_email_option == "Yes"
 
 st.sidebar.markdown("---")
 
+
+# --- RUN BUTTON ---
+st.sidebar.markdown("### ▶️ Run Tests")
+sidebar_run = st.sidebar.button(
+    "🚀 Run Tests Now",
+    use_container_width=True,
+    type="primary",
+    help="Run tests with the settings selected above"
+)
+
+st.sidebar.markdown("---")
+
+
 # --- Schedule Toggle ---
 st.sidebar.markdown("### 🕒 Auto Schedule")
 schedule_enabled = st.sidebar.toggle(
@@ -426,6 +439,8 @@ if user_input:
         command = "all"
 elif quick_command:
     command = quick_command
+elif sidebar_run:
+    command = selected_test_mode  # ← uses whatever is selected in sidebar
 
 # Override with sidebar test mode if chat says "all"
 if command == "all" and selected_test_mode != "all":
