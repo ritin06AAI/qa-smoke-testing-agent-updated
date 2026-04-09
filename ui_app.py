@@ -251,11 +251,22 @@ notif_platform = st.sidebar.selectbox(
 )
 webhook_url = ""
 if notif_platform != "None":
-    webhook_url = st.sidebar.text_input(
-        f"{notif_platform} Webhook URL",
-        type="password",
-        placeholder="https://hooks.slack.com/..."
-    )
+    # Auto-fill from secrets
+default_webhook = ""
+try:
+    if notif_platform == "Slack":
+        default_webhook = st.secrets.get("SLACK_WEBHOOK_URL", "")
+    elif notif_platform == "Microsoft Teams":
+        default_webhook = st.secrets.get("TEAMS_WEBHOOK_URL", "")
+except:
+    pass
+
+webhook_url = st.sidebar.text_input(
+    f"{notif_platform} Webhook URL",
+    value=default_webhook,
+    type="password",
+    placeholder="https://hooks.slack.com/..."
+)
     if webhook_url:
         st.sidebar.success(f"✅ {notif_platform} webhook configured")
     else:
