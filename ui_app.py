@@ -260,23 +260,12 @@ if notif_platform != "None":
             default_webhook = st.secrets.get("TEAMS_WEBHOOK_URL", "")
     except:
         pass
-
     webhook_url = st.sidebar.text_input(
         f"{notif_platform} Webhook URL",
         value=default_webhook,
         type="password",
         placeholder="https://hooks.slack.com/..."
     )
-    if webhook_url:
-        st.sidebar.success(f"✅ {notif_platform} webhook configured")
-    else:
-        st.sidebar.warning(f"⚠️ Enter {notif_platform} webhook URL")
-webhook_url = st.sidebar.text_input(
-    f"{notif_platform} Webhook URL",
-    value=default_webhook,
-    type="password",
-    placeholder="https://hooks.slack.com/..."
-)
     if webhook_url:
         st.sidebar.success(f"✅ {notif_platform} webhook configured")
     else:
