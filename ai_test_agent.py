@@ -1104,7 +1104,7 @@ class AITestAgentScheduled:
         html_content = f"""<!DOCTYPE html>
 <html>
 <head>
-    <title>AI Test Agent Report</title>
+    <title>AI  Daily Smoke Test Agent Report</title>
     <style>
         body {{ font-family: 'Segoe UI', Arial; margin: 0; background: linear-gradient(135deg, #1a1a2e, #16213e); min-height: 100vh; padding: 20px; }}
         .container {{ max-width: 1000px; margin: 0 auto; }}
@@ -1134,7 +1134,7 @@ class AITestAgentScheduled:
 <body>
     <div class="container">
         <div class="header">
-            <h1>AI Test Agent Report</h1>
+            <h1>AI  Daily Smoke Test Agent Report</h1>
             <p>Automation Anywhere Website - Daily Automated Testing</p>
             <p>Agent: {self.agent_name} | Version: {self.version} | Date: {datetime.now().strftime('%Y-%m-%d')} | Duration: {duration}</p>
         </div>
@@ -1640,18 +1640,18 @@ def send_email_report(reports, agent):
 
         summary = reports['summary']
         if summary['failed'] > 0:
-            subject = f"[ACTION REQUIRED] AI Test Agent Report - {summary['failed']} Failures - {datetime.now().strftime('%Y-%m-%d')}"
+            subject = f"[ACTION REQUIRED] AI  Daily Smoke Test Agent Report - {summary['failed']} Failures - {datetime.now().strftime('%Y-%m-%d')}"
         elif summary['warnings'] > 0:
-            subject = f"[WARNING] AI Test Agent Report - {summary['warnings']} Warnings - {datetime.now().strftime('%Y-%m-%d')}"
+            subject = f"[WARNING] AI  Daily Smoke Test Agent Report - {summary['warnings']} Warnings - {datetime.now().strftime('%Y-%m-%d')}"
         else:
-            subject = f"[SUCCESS] AI Test Agent Report - All Tests Passed - {datetime.now().strftime('%Y-%m-%d')}"
+            subject = f"[SUCCESS] AI  Daily Smoke Test Agent Report - All Tests Passed - {datetime.now().strftime('%Y-%m-%d')}"
 
         msg['Subject'] = subject
 
         body = f"""
         <html>
         <body style="font-family: Arial, sans-serif;">
-            <h1 style="color: #667eea;">AI Test Agent - Daily Report</h1>
+            <h1 style="color: #667eea;">AI Smoke Testing Agent - Daily Report</h1>
             <p><strong>Date:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
             <p><strong>Agent:</strong> {agent.agent_name}</p>
             <h2>Test Summary</h2>

@@ -1,0 +1,43 @@
+flowchart TB
+    A[Streamlit Dashboard\n(User selects JIRA mode and enters smoke test command)]:::blue
+    B[Mode Selection\n(UI maps command and starts test runner)]:::blue
+    C[Agent Initialization\n(Load knowledge, folders, results, issues)]:::green
+    D[Run Smoke Tests\n(Website, nav, search, page, form, perf, mobile)]:::orange
+    E[Popup & Locator Handling\n(Handle popups + smart locators)]:::orange
+
+    F{Test Passed?}:::decision
+
+    G[Store Pass Result\n(Save status, message, details, time)]:::greenLight
+    H[Capture Failure\n(Log issue, screenshot, URL, details)]:::redLight
+
+    I[Generate Reports\n(HTML report, issue doc, run summary)]:::purple
+
+    J{JIRA Enabled?}:::decision
+
+    K[Create Jira Ticket\n(Create/update issue with evidence)]:::blueLight
+    L[Skip Jira\n(No ticket, keep reports and logs)]:::gray
+
+    M[Email & Dashboard Output\n(Send email + show summary, reports,\nscreenshots, history)]:::red
+
+    %% Main spine
+    A --> B --> C --> D --> E --> F
+
+    %% Pass/Fail branches
+    F -->|Yes| G --> I
+    F -->|No| H --> I
+
+    %% Jira decision
+    I --> J
+    J -->|Yes| K --> M
+    J -->|No| L --> M
+
+    classDef blue fill:#e0edff,stroke:#2563eb,stroke-width:2,color:#0f172a;
+    classDef blueLight fill:#e5f0ff,stroke:#2563eb,stroke-width:2,color:#0f172a;
+    classDef green fill:#dcfce7,stroke:#16a34a,stroke-width:2,color:#052e16;
+    classDef greenLight fill:#ecfdf3,stroke:#16a34a,stroke-width:2,color:#052e16;
+    classDef orange fill:#ffedd5,stroke:#ea580c,stroke-width:2,color:#431407;
+    classDef purple fill:#ede9fe,stroke:#7c3aed,stroke-width:2,color:#2e1065;
+    classDef red fill:#fee2e2,stroke:#b91c1c,stroke-width:2,color:#450a0a;
+    classDef redLight fill:#fff1f2,stroke:#b91c1c,stroke-width:2,color:#450a0a;
+    classDef gray fill:#f3f4f6,stroke:#6b7280,stroke-width:2,color:#111827;
+    classDef decision fill:#ffffff,stroke:#94a3b8,stroke-width:2,color:#111827;

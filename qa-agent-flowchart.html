@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Internal QA Agent Flowchart</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --line: #94a3b8;
+      --blue: #dbeafe;
+      --green: #dcfce7;
+      --orange: #ffedd5;
+      --purple: #ede9fe;
+      --red: #fee2e2;
+      --shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #f8fbff 0%, #eef3fb 100%);
+      font-family: Arial, sans-serif;
+      color: var(--text);
+    }
+    .page {
+      width: 1600px;
+      min-height: 1000px;
+      margin: 0 auto;
+      padding: 34px 40px 40px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 34px;
+      color: #0f172a;
+    }
+    .sub {
+      margin-top: 8px;
+      margin-bottom: 28px;
+      font-size: 16px;
+      color: #64748b;
+    }
+    .flowchart {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .node {
+      width: 420px;
+      background: var(--card);
+      border-radius: 18px;
+      padding: 16px 20px;
+      box-shadow: var(--shadow);
+      border: 2px solid #dbe4f0;
+      text-align: center;
+    }
+    .node .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 6px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+      color: #0f172a;
+    }
+    .blue .tag { background: var(--blue); }
+    .green .tag { background: var(--green); }
+    .orange .tag { background: var(--orange); }
+    .purple .tag { background: var(--purple); }
+    .red .tag { background: var(--red); }
+    .node h3 {
+      margin: 0 0 6px;
+      font-size: 20px;
+    }
+    .node p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .arrow {
+      width: 2px;
+      height: 34px;
+      background: var(--line);
+      position: relative;
+    }
+    .arrow:after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: -1px;
+      border-top: 11px solid var(--line);
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+    }
+    .decision {
+      width: 300px;
+      height: 300px;
+      transform: rotate(45deg);
+      background: #fff;
+      border: 2px solid #dbe4f0;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 18px 0;
+    }
+    .decision .inner {
+      transform: rotate(-45deg);
+      text-align: center;
+      width: 70%;
+    }
+    .decision h3 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+    .decision p {
+      margin: 0;
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .branch-wrap {
+      width: 1360px;
+      display: grid;
+      grid-template-columns: 1fr 120px 1fr;
+      align-items: start;
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+    .branch-side {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .branch-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #334155;
+      background: #fff;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid #dbe4f0;
+    }
+    .connector-box {
+      position: relative;
+      height: 74px;
+      width: 100%;
+    }
+    .connector-box svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+    .branch-node {
+      width: 420px;
+      background: #fff;
+      border-radius: 18px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+      border: 2px solid #dbe4f0;
+      text-align: center;
+      min-height: 126px;
+    }
+    .branch-node h4 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      color: #0f172a;
+    }
+    .branch-node p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .bottom-note {
+      margin-top: 30px;
+      background: rgba(255,255,255,0.88);
+      border: 1px solid #dbe4f0;
+      border-radius: 18px;
+      padding: 16px 18px;
+      font-size: 15px;
+      color: #334155;
+      box-shadow: var(--shadow);
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Internal QA Agent Workflow Flowchart</h1>
+    <div class="sub">Flowchart view of the current internal smoke testing process with Streamlit control, Selenium execution, reporting, email, and Jira integration.</div>
+
+    <div class="flowchart">
+      <div class="node blue">
+        <div class="tag">Start</div>
+        <h3>User Opens Streamlit Dashboard</h3>
+        <p>User selects JIRA mode and enters a command such as navigation, form, performance, mobile, or full smoke run.</p>
+      </div>
+
+      <div class="arrow"></div>
+
+      <div class="node blue">
+        <div class="tag">Control</div>
+        <h3>Mode Selection and Trigger</h3>
+        <p>The dashboard maps the command to the execution mode and calls the AI test runner.</p>
+      </div>
+
+      <div class="arrow"></div>
+
+      <div class="node green">
+        <div class="tag">Initialize</div>
+        <h3>Agent Setup</h3>
+        <p>The agent starts, loads the knowledge base, prepares report and screenshot folders, and initializes result containers.</p>
+      </div>
+
+      <div class="arrow"></div>
+
+      <div class="node orange">
+        <div class="tag">Execution</div>
+        <h3>Launch Browser and Run Smoke Tests</h3>
+        <p>Chrome WebDriver starts and executes website accessibility, navigation, search, page, form, performance, and mobile checks based on mode.</p>
+      </div>
+
+      <div class="arrow"></div>
+
+      <div class="node orange">
+        <div class="tag">Resilience</div>
+        <h3>Handle Popups and Smart Locators</h3>
+        <p>The agent closes cookie banners or modal popups and searches elements using CSS, XPath, text, ID, and name strategies.</p>
+      </div>
+
+      <div class="arrow"></div>
+
+      <div class="decision">
+        <div class="inner">
+          <h3>Test Passed?</h3>
+          <p>Result is evaluated for pass, fail, warning, or recovery through fallback logic.</p>
+        </div>
+      </div>
+
+      <div class="branch-wrap">
+        <div class="branch-side">
+          <div class="branch-label">Yes</div>
+          <div class="connector-box">
+            <svg viewBox="0 0 400 74" xmlns="http://www.w3.org/2000/svg">
+              <path d="M390 4 L200 4 L200 70" fill="none" stroke="#94a3b8" stroke-width="3"/>
+              <polygon points="200,72 193,60 207,60" fill="#94a3b8"/>
+            </svg>
+          </div>
+          <div class="branch-node">
+            <h4>Store Pass Result</h4>
+            <p>Status, message, details, and timestamp are saved to the result set for reporting.</p>
+          </div>
+        </div>
+
+        <div></div>
+
+        <div class="branch-side">
+          <div class="branch-label">No</div>
+          <div class="connector-box">
+            <svg viewBox="0 0 400 74" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 4 L200 4 L200 70" fill="none" stroke="#94a3b8" stroke-width="3"/>
+              <polygon points="200,72 193,60 207,60" fill="#94a3b8"/>
+            </svg>
+          </div>
+          <div class="branch-node">
+            <h4>Capture Failure Evidence</h4>
+            <p>The agent logs the issue, captures screenshots, stores the URL and failure details, and marks the test as failed.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow"></div>
+
+      <div class="node purple">
+        <div class="tag">Reporting</div>
+        <h3>Generate Reports</h3>
+        <p>The system generates the HTML report, prepares issue documents when defects exist, and summarizes total tests, pass rate, and issues found.</p>
+      </div>
+
+      <div class="arrow"></div>
+
+      <div class="decision">
+        <div class="inner">
+          <h3>JIRA Enabled?</h3>
+          <p>The workflow checks whether the run was started with Jira integration turned on.</p>
+        </div>
+      </div>
+
+      <div class="branch-wrap">
+        <div class="branch-side">
+          <div class="branch-label">Yes</div>
+          <div class="connector-box">
+            <svg viewBox="0 0 400 74" xmlns="http://www.w3.org/2000/svg">
+              <path d="M390 4 L200 4 L200 70" fill="none" stroke="#94a3b8" stroke-width="3"/>
+              <polygon points="200,72 193,60 207,60" fill="#94a3b8"/>
+            </svg>
+          </div>
+          <div class="branch-node">
+            <h4>Create or Update Jira Ticket</h4>
+            <p>Issue details and generated evidence are sent to Jira so the failure becomes a tracked work item.</p>
+          </div>
+        </div>
+
+        <div></div>
+
+        <div class="branch-side">
+          <div class="branch-label">No</div>
+          <div class="connector-box">
+            <svg viewBox="0 0 400 74" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 4 L200 4 L200 70" fill="none" stroke="#94a3b8" stroke-width="3"/>
+              <polygon points="200,72 193,60 207,60" fill="#94a3b8"/>
+            </svg>
+          </div>
+          <div class="branch-node">
+            <h4>Skip Jira Step</h4>
+            <p>The workflow continues without ticket creation while still preserving reports and alerts.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow"></div>
+
+      <div class="node red">
+        <div class="tag">Notify</div>
+        <h3>Send Email and Show Dashboard Output</h3>
+        <p>The agent sends email notifications and the Streamlit dashboard shows execution summary, test details, reports, screenshots, and run history.</p>
+      </div>
+    </div>
+
+    <div class="bottom-note">
+      <strong>Business summary:</strong> The internal QA workflow starts from the Streamlit dashboard, executes smoke tests through Selenium, handles UI instability using smart locator logic, records evidence, generates reports, optionally creates Jira issues, and gives the team immediate visibility through email and dashboard output.
+    </div>
+  </div>
+</body>
+</html>
