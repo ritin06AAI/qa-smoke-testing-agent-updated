@@ -144,8 +144,6 @@ if "last_reports" not in st.session_state:
     st.session_state.last_reports = None
 if "history_cleared" not in st.session_state:
     st.session_state.history_cleared = False
-if "schedule_enabled" not in st.session_state:
-    st.session_state.schedule_enabled = False
 
 # =========================
 # HISTORY FILE
@@ -228,21 +226,6 @@ sidebar_run = st.sidebar.button(
 
 st.sidebar.markdown("---")
 
-
-# --- Schedule Toggle ---
-st.sidebar.markdown("### 🕒 Auto Schedule")
-schedule_enabled = st.sidebar.toggle(
-    "Enable 7 PM IST Daily Run",
-    value=st.session_state.schedule_enabled
-)
-st.session_state.schedule_enabled = schedule_enabled
-if schedule_enabled:
-    st.sidebar.success("✅ Scheduled: Daily at 7:00 PM IST")
-else:
-    st.sidebar.info("⏸️ Schedule disabled")
-
-st.sidebar.markdown("---")
-
 # --- Slack/Teams Notification ---
 st.sidebar.markdown("### 🔔 Notifications")
 notif_platform = st.sidebar.selectbox(
@@ -306,8 +289,7 @@ with col_status:
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown('<span class="status-online">🟢 Agent Online</span>', unsafe_allow_html=True)
     if last_run:
-        next_run = "Today 7:00 PM IST" if schedule_enabled else "Manual Only"
-        st.caption(f"Next Run: {next_run}")
+        st.caption(f"Next Run: Manual Only")
 
 st.markdown("---")
 
