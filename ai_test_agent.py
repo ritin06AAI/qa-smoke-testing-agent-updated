@@ -1857,5 +1857,5 @@ if __name__ == "__main__":
             except Exception as e:
                 print(f"\nCould not open report automatically: {str(e)[:80]}")
     else:
-        # Default: start the scheduler — waits for 19:00 IST dail
+        # Default: start the scheduler — waits for 19:00 IST daily
         run_scheduled()
