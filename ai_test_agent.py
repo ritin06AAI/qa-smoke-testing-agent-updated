@@ -581,14 +581,183 @@ class AITestAgentScheduled:
                 print("   PASS - Solutions page loaded")
                 self.add_result("Solutions Page", "PASS", driver.current_url)
 
+
+                # TEST 6: Demo Library - Category Content Check
+            print("\n" + "-" * 70)
+            print("TEST 6: Demo Library - Category Content Check")
+            print("-" * 70)
+
+            driver.get("https://www.automationanywhere.com/resources/ai/demo-library")
+
+            # Hard refresh the page
+            driver.execute_script("location.reload(true);")
+            print("   INFO - Hard refresh done")
+
+            # Wait for page to fully load
+            try:
+                wait.until(lambda d: d.execute_script("return document.readyState") == "complete")
+                print("   INFO - Page loaded after refresh")
+            except:
+                print("   WARN - Page load timeout, proceeding anyway")
+
+            time.sleep(3)
+            self.handle_popups(driver)
+
+            # Categories to check
+            categories = ["All", "Interactive Demo", "Video Demo"]
+            category_results = {}
+
+            for category in categories:
+                print(f"\n   Checking category: '{category}'")
+                try:
+                    # Find and click the category tab
+                    category_clicked = False
+
+                    # Try different strategies to find category tab
+                    tab_strategies = [
+                        f"//button[normalize-space(text())='{category}']",
+                        f"//a[normalize-space(text())='{category}']",
+                        f"//li[normalize-space(text())='{category}']",
+                        f"//span[normalize-space(text())='{category}']",
+                        f"//*[contains(@class,'tab') and normalize-space(text())='{category}']",
+                        f"//*[contains(@class,'filter') and normalize-space(text())='{category}']",
+                        f"//*[contains(@class,'category') and normalize-space(text())='{category}']",
+                    ]
+
+                    for xpath in tab_strategies:
+                        try:
+                            tab_element = WebDriverWait(driver, 5).until(
+                                EC.element_to_be_clickable((By.XPATH, xpath))
+                            )
+                            driver.execute_script("arguments[0].scrollIntoView(true);", tab_element)
+                            time.sleep(0.5)
+                            driver.execute_script("arguments[0].click();", tab_element)
+                            print(f"   INFO - Clicked '{category}' tab")
+                            category_clicked = True
+                            break
+                        except:
+                            continue
+
+                    if not category_clicked:
+                        print(f"   WARN - Could not click '{category}' tab, checking content anyway")
+
+                    # Wait for content to load after tab click
+                    time.sleep(2)
+
+                    # Check if content is present
+                    content_found = False
+
+                    # Strategy 1: Check for cards/items in the page
+                    content_selectors = [
+                        "[class*='card']",
+                        "[class*='demo']",
+                        "[class*='item']",
+                        "[class*='resource']",
+                        "[class*='grid']",
+                        "article",
+                        "[class*='tile']",
+                        "[class*='content']",
+                    ]
+
+                    for selector in content_selectors:
+                        try:
+                            elements = driver.find_elements(By.CSS_SELECTOR, selector)
+                            visible_elements = [e for e in elements if e.is_displayed()]
+                            if len(visible_elements) > 0:
+                                content_found = True
+                                print(f"   INFO - Found {len(visible_elements)} content items with '{selector}'")
+                                break
+                        except:
+                            continue
+
+                    # Strategy 2: Check page text has meaningful content
+                    if not content_found:
+                        try:
+                            page_text = driver.execute_script("return document.body.innerText")
+                            meaningful_keywords = ["demo", "watch", "view", "interactive", "video", "explore"]
+                            keyword_found = any(kw in page_text.lower() for kw in meaningful_keywords)
+                            if keyword_found:
+                                content_found = True
+                                print(f"   INFO - Content keywords found in page text")
+                        except:
+                            pass
+
+                    # Strategy 3: Check if page has images/media
+                    if not content_found:
+                        try:
+                            images = driver.find_elements(By.CSS_SELECTOR, "img[src], video, iframe")
+                            visible_images = [img for img in images if img.is_displayed()]
+                            if len(visible_images) > 2:  # more than 2 images means content is there
+                                content_found = True
+                                print(f"   INFO - Found {len(visible_images)} media elements")
+                        except:
+                            pass
+
+                    # Record result
+                    if content_found:
+                        print(f"   PASS - '{category}' has content ✅")
+                        self.add_result(
+                            f"Demo Library - {category}",
+                            "PASS",
+                            f"Content found in '{category}' category"
+                        )
+                        self.capture_screenshot(driver, f"Demo_Library_{category.replace(' ', '_')}", "pass")
+                        category_results[category] = True
+                    else:
+                        print(f"   FAIL - '{category}' has no content ❌")
+                        screenshot = self.capture_screenshot(
+                            driver,
+                            f"Demo_Library_{category.replace(' ', '_')}_Empty",
+                            "failure"
+                        )
+                        self.add_result(
+                            f"Demo Library - {category}",
+                            "FAIL",
+                            f"No content found in '{category}' category"
+                        )
+                        self.add_issue(
+                            f"Demo Library - {category}",
+                            "Empty Category",
+                            f"No content found in '{category}' tab on Demo Library page",
+                            screenshot,
+                            driver.current_url
+                        )
+                        category_results[category] = False
+
+                except Exception as e:
+                    print(f"   FAIL - Error checking '{category}': {str(e)[:60]}")
+                    screenshot = self.capture_screenshot(
+                        driver,
+                        f"Demo_Library_{category.replace(' ', '_')}_Error",
+                        "failure"
+                    )
+                    self.add_result(
+                        f"Demo Library - {category}",
+                        "FAIL",
+                        f"Error: {str(e)[:60]}"
+                    )
+                    category_results[category] = False
+
+            # Overall Demo Library result
+            all_passed = all(category_results.values())
+            passed_count = sum(1 for v in category_results.values() if v)
+            total_count = len(category_results)
+
+            print(f"\n   Demo Library Summary: {passed_count}/{total_count} categories have content")
+            self.add_result(
+                "Demo Library - Overall",
+                "PASS" if all_passed else "FAIL",
+                f"{passed_count}/{total_count} categories have content"
+            )
+
             # =========================
             # =========================
             # FORM GROUP
-            # (TEST 6)
+            # (TEST 7)
             # =========================
             if run_form:
                 print("\n" + "-" * 70)
-                print("TEST 6: Demo Request Form")
+                print("TEST 7: Demo Request Form")
                 print("-" * 70)
 
                 driver.get("https://www.automationanywhere.com/request-live-demo")
@@ -920,11 +1089,11 @@ class AITestAgentScheduled:
             
             
             # =========================
-            # PERFORMANCE GROUP (TEST 7)
+            # PERFORMANCE GROUP (TEST 8)
             # =========================
             if run_performance:
                 print("\n" + "-" * 70)
-                print("TEST 7: Page Performance")
+                print("TEST 8: Page Performance")
                 print("-" * 70)
 
                 start = time.time()
@@ -943,11 +1112,11 @@ class AITestAgentScheduled:
                     self.add_result("Page Performance", "FAIL", f"{load_time:.2f}s (very slow)")
 
             # =========================
-            # MOBILE GROUP (TEST 8)
+            # MOBILE GROUP (TEST 9)
             # =========================
             if run_mobile:
                 print("\n" + "-" * 70)
-                print("TEST 8: Responsive Design")
+                print("TEST 9: Responsive Design")
                 print("-" * 70)
 
                 viewports = [
