@@ -62,7 +62,7 @@ EMAIL_CONFIG = {
 # JIRA CONFIGURATION
 # =============================================================================
 JIRA_CONFIG = {
-    "enabled": get_config("JIRA_ENABLED", "True") == "True",
+    "enabled": get_config("JIRA_ENABLED", "False") == "True",
     "base_url": get_config("JIRA_BASE_URL"),
     "email": get_config("JIRA_EMAIL"),
     "api_token": get_config("JIRA_API_TOKEN"),
