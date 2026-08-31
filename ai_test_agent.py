@@ -82,7 +82,7 @@ JIRA_CONFIG = {
 # The `schedule` library uses YOUR SYSTEM CLOCK (not UTC).
 #   - If your Windows clock shows IST time  →  keep "19:00"
 #   - If your Windows clock shows UTC time  →  change to "13:30" (UTC+5:30)
-# To verify: open CMD and run `time` — it shows your system clock.
+# To verify: open CMD and run `time` — it shows your system clock
 # =============================================================================
 SCHEDULE_TIME = "19:00"   # 7:00 PM IST — change to "13:30" if clock is UTC
 
