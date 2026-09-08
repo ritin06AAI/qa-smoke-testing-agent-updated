@@ -77,7 +77,7 @@ JIRA_CONFIG = {
 }
 
 # =============================================================================
-# SCHEDULE CONFIGURATION
+# SCHEDULE CONFIGURATION.
 # -----------------------------------------------------------------------------
 # The `schedule` library uses YOUR SYSTEM CLOCK (not UTC).
 #   - If your Windows clock shows IST time  →  keep "19:00"
